@@ -1,7 +1,6 @@
 $(document).ready(function() {
 	
-	var current = 0,
-		animating = false,
+	var animating = false,
 		start = true,
 		end = false,
 		slide_w = $('.pres_holder').width(),
@@ -12,9 +11,11 @@ $(document).ready(function() {
 	// constants
 	const pres_holder = $('.pres_holder'),
 		totalSlides = $('.slide').length,
-		editors = [],
-		precode = [], // bind function to execute before each slide
-		postcode = [];
+		editors = [];
+
+	window.preSlide = []; // bind function to execute before each slide
+	window.current = 0;
+	window.onReset = null;
 		
 	// check slide position
 	var checkPosition = function() {
@@ -44,6 +45,11 @@ $(document).ready(function() {
 		$('.code-live').find('i').removeClass('fa-circle-o').removeClass('fa-dot-circle-o').addClass('fa-circle-o');
     	$('.slide').eq(slide).find('.editor').removeClass('half-size');
     	$('.toggle-code').find('i').removeClass('fa-times').addClass('fa-code');
+    	$('.code-live').removeClass('blink');
+    	live_coding = false;
+    	if (typeof onReset == 'function') {
+    		onReset();
+    	}
     };
 
 	// check if slide contain code
@@ -72,8 +78,8 @@ $(document).ready(function() {
 			'margin-top': '8vh'
 		}, 500);
 
-		if (typeof precode[slide] == 'function') {
-			precode[slide]();
+		if (typeof preSlide[slide] == 'function') {
+			preSlide[slide]();
 		}
 
 		$('.slide').each(function(){
@@ -105,12 +111,6 @@ $(document).ready(function() {
 		}, 1000);
 
 		$('.slides-count').html(current + ' / ' + (totalSlides - 1) );
-
-		for (var i = 0; i < postcode.length; i++) {
-			if (typeof postcode[i] == 'function') {
-				postcode[i]();
-			}
-		}
 	};
 
 	var slideStep = function(isForward) {
@@ -226,15 +226,23 @@ $(document).ready(function() {
     });
 
     $('.toggle-code').click(function() {
-    	var pos = ($('.slide').eq(current).find('.editor').css('top') == '0px') ? '100%' : '0px';
+    	$('.slide').eq(current).find('.editor').removeClass('half-size');
 
-    	$('.slide').eq(current).find('.editor').animate({
-			'top': pos
-		}, 500);
+    	setTimeout(function() {
+    		var pos = ($('.slide').eq(current).find('.editor').css('top') == '0px') ? '100%' : '0px';
+
+	    	$('.slide').eq(current).find('.editor').animate({
+				'top': pos
+			}, 500);
+    	}, 500);
+    
 		$('.toggle-code').toggleClass('blink');
 		$('.code-size').toggleClass('disabled');
 		$('.code-live').toggleClass('disabled');
 		$('.toggle-code').find('i').toggleClass('fa-times').toggleClass('fa-code');
+		$('.code-live').find('i').removeClass('fa-circle-o').removeClass('fa-dot-circle-o').addClass('fa-circle-o');
+		$('.code-live').removeClass('blink');
+		live_coding = false;
     });
 
     // handle resize
@@ -258,7 +266,7 @@ $(document).ready(function() {
     var init = function() {
     	// init slides holser
     	$('.pres_holder_inner').css('width', (totalSlides + 1) * (slide_w + 100) + 'px');
-    	
+
 		// populate slides count
 		$('.slides-count').html('0 / ' + (totalSlides - 1));
 
