@@ -195,7 +195,11 @@ $(document).ready(function() {
 		editors[pos].getSession().setMode('ace/mode/csharp');
 		editors[pos].setTheme("ace/theme/monokai");
 		editors[pos].getSession().setMode("ace/mode/javascript");
-		editors[pos].session.setOptions({ tabSize: 2, useSoftTabs: true });
+		editors[pos].session.setOptions({ 
+			tabSize: 2, 
+			useSoftTabs: true
+		});
+		editors[pos].setFontSize(50);
 		editors[pos].setShowPrintMargin(false);
 
 		editors[pos].getSession().on("changeAnnotation", function(){
